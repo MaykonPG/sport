@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Widget Futebol</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f0f0f0; }
+  .match { background: #fff; padding: 10px; margin: 10px; border-radius: 8px; box-shadow: 0 0 5px #aaa; }
+</style>
+</head>
+<body>
+<h2>Próximos jogos da Premier League</h2>
+<div id="matches">Carregando...</div>
+
+<script>
+const options = {
+  method: 'GET',
+  headers: {
+    'X-RapidAPI-Key': '616ff288698d9ac4e8b87cb42749ae04',
+    'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
+  }
+};
+
+fetch('https://api-football-v1.p.rapidapi.com/v3/fixtures?league=39&season=2025&next=5', options)
+  .then(response => response.json())
+  .then(data => {
+    const matchesDiv = document.getElementById('matches');
+    matchesDiv.innerHTML = '';
+    data.response.forEach(game => {
+      const home = game.teams.home.name;
+      const away = game.teams.away.name;
+      const date = new Date(game.fixture.date).toLocaleString();
+      matchesDiv.innerHTML += `<div class="match"><strong>${home}</strong> x <strong>${away}</strong><br>${date}</div>`;
+    });
+  })
+  .catch(err => document.getElementById('matches').innerText = 'Erro ao carregar jogos');
+</script>
+</body>
+</html>
