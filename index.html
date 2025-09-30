@@ -2,44 +2,78 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Notícias de Futebol</title>
+  <title>Painel Rolante de Notícias de Futebol</title>
   <style>
-    body { background: #1e1e2f; color: #fff; font-family: Arial, sans-serif; padding: 20px; }
-    h1 { text-align: center; }
-    ul { list-style: none; padding: 0; }
-    li { margin-bottom: 10px; }
-    a { color: #00ff00; text-decoration: none; }
-    a:hover { text-decoration: underline; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: #fff;
+      overflow: hidden;
+    }
+    #ticker {
+      position: absolute;
+      white-space: nowrap;
+      will-change: transform;
+      font-size: 2em;
+      padding-left: 100%;
+    }
   </style>
 </head>
 <body>
-  <h1>Notícias de Futebol</h1>
-  <ul id="noticias"></ul>
+  <div id="ticker">Carregando notícias...</div>
 
   <script>
-    const urlRSS = "https://globoesporte.globo.com/rss/futebol/"; // Feed público
+    const ticker = document.getElementById('ticker');
 
     async function carregarNoticias() {
       try {
-        const resposta = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(urlRSS)}`);
-        const dados = await resposta.json();
+        // Usando proxy público para evitar CORS (funciona no navegador)
+        const proxy = 'https://api.allorigins.win/get?url=';
+        const rssUrl = encodeURIComponent('https://www.espn.com.br/espn/rss/futebol.xml');
+        const response = await fetch(proxy + rssUrl);
+        const data = await response.json();
 
-        const ul = document.getElementById("noticias");
-        ul.innerHTML = "";
+        // Converter XML do RSS em texto
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+        const items = xmlDoc.querySelectorAll("item");
+        const noticias = Array.from(items).map(item => item.querySelector("title").textContent);
 
-        dados.items.slice(0, 10).forEach(item => { // mostra só 10 notícias
-          const li = document.createElement("li");
-          li.innerHTML = `<a href="${item.link}" target="_blank">${item.title}</a>`;
-          ul.appendChild(li);
-        });
-      } catch (err) {
-        console.error("Erro ao carregar notícias:", err);
+        iniciarTicker(noticias);
+
+      } catch (error) {
+        ticker.textContent = "Erro ao carregar notícias.";
+        console.error(error);
       }
     }
 
+    function iniciarTicker(noticias) {
+      let index = 0;
+
+      function mostrarNoticia() {
+        ticker.textContent = noticias[index];
+        index = (index + 1) % noticias.length;
+        ticker.style.transform = `translateX(${window.innerWidth}px)`;
+        const largura = ticker.offsetWidth;
+        let pos = window.innerWidth;
+
+        function mover() {
+          pos--;
+          ticker.style.transform = `translateX(${pos}px)`;
+          if (pos + largura > 0) {
+            requestAnimationFrame(mover);
+          } else {
+            setTimeout(mostrarNoticia, 1000); // pausa antes da próxima notícia
+          }
+        }
+        mover();
+      }
+
+      mostrarNoticia();
+    }
+
     carregarNoticias();
-    setInterval(carregarNoticias, 60000); // atualiza a cada 1 min
   </script>
 </body>
 </html>
-
