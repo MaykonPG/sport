@@ -1,48 +1,51 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>Notícias Públicas</title>
-<style>
-body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f9; }
-h1 { color: #333; }
-.news-item { background: #fff; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.news-item a { text-decoration: none; color: #007bff; }
-.news-item a:hover { text-decoration: underline; }
-</style>
+  <meta charset="UTF-8">
+  <title>Hora Atual - São Paulo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f2f2f2;
+    }
+    #clock {
+      font-size: 3em;
+      background: #fff;
+      padding: 20px 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+  </style>
 </head>
 <body>
+  <div id="clock">Carregando...</div>
 
-<h1>Últimas Notícias</h1>
-<div id="news-container"></div>
-
-<script>
-async function fetchNews() {
-    const url = 'https://inshortsapi.vercel.app/news?category=all'; // notícias gerais
-    try {
-        const response = await fetch(url);
+  <script>
+    async function fetchTime() {
+      try {
+        const response = await fetch('http://worldtimeapi.org/api/timezone/America/Sao_Paulo');
         const data = await response.json();
-        const container = document.getElementById('news-container');
-        container.innerHTML = '';
+        const dateTime = new Date(data.datetime);
 
-        data.data.forEach((item, index) => {
-            if(index >= 10) return; // mostra só 10 notícias
-            const newsDiv = document.createElement('div');
-            newsDiv.classList.add('news-item');
+        // Formatar hora como HH:MM:SS
+        const hours = String(dateTime.getHours()).padStart(2, '0');
+        const minutes = String(dateTime.getMinutes()).padStart(2, '0');
+        const seconds = String(dateTime.getSeconds()).padStart(2, '0');
 
-            newsDiv.innerHTML = `<h2><a href="${item.readMoreUrl || '#'}" target="_blank">${item.title}</a></h2>
-                                 <p>${item.content}</p>`;
-            container.appendChild(newsDiv);
-        });
-    } catch(e) {
-        console.error("Erro ao buscar notícias:", e);
+        document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+      } catch (error) {
+        document.getElementById('clock').textContent = 'Erro ao carregar hora';
+        console.error(error);
+      }
     }
-}
 
-// Atualiza a cada 5 minutos
-setInterval(fetchNews, 5*60*1000);
-fetchNews();
-</script>
-
+    // Atualiza a cada segundo
+    fetchTime();
+    setInterval(fetchTime, 1000);
+  </script>
 </body>
 </html>
