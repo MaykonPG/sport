@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Notícias de Futebol</title>
+<title>Notícias Públicas</title>
 <style>
 body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f9; }
 h1 { color: #333; }
@@ -13,32 +13,25 @@ h1 { color: #333; }
 </head>
 <body>
 
-<h1>Últimas Notícias de Futebol</h1>
+<h1>Últimas Notícias</h1>
 <div id="news-container"></div>
 
 <script>
-async function fetchRSS() {
-    const proxy = 'https://api.allorigins.win/get?url='; // Evita bloqueio CORS
-    const rssUrl = encodeURIComponent('https://globoesporte.globo.com/rss/futebol/');
+async function fetchNews() {
+    const url = 'https://inshortsapi.vercel.app/news?category=all'; // notícias gerais
     try {
-        const response = await fetch(proxy + rssUrl);
+        const response = await fetch(url);
         const data = await response.json();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(data.contents, "text/xml");
-        const items = xml.querySelectorAll("item");
         const container = document.getElementById('news-container');
         container.innerHTML = '';
 
-        items.forEach((item, index) => {
-            if(index >= 10) return; // Mostra apenas 10 notícias
+        data.data.forEach((item, index) => {
+            if(index >= 10) return; // mostra só 10 notícias
             const newsDiv = document.createElement('div');
             newsDiv.classList.add('news-item');
 
-            const title = item.querySelector('title').textContent;
-            const link = item.querySelector('link').textContent;
-            const description = item.querySelector('description').textContent;
-
-            newsDiv.innerHTML = `<h2><a href="${link}" target="_blank">${title}</a></h2><p>${description}</p>`;
+            newsDiv.innerHTML = `<h2><a href="${item.readMoreUrl || '#'}" target="_blank">${item.title}</a></h2>
+                                 <p>${item.content}</p>`;
             container.appendChild(newsDiv);
         });
     } catch(e) {
@@ -47,10 +40,9 @@ async function fetchRSS() {
 }
 
 // Atualiza a cada 5 minutos
-setInterval(fetchRSS, 5 * 60 * 1000);
-fetchRSS();
+setInterval(fetchNews, 5*60*1000);
+fetchNews();
 </script>
 
 </body>
 </html>
-
