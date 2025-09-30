@@ -1,1 +1,91 @@
-<iframe src="https://www.espn.com.br/futebol/" style="width:100vw; height:100vh; border:none;"></iframe>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notícias de Futebol</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            color: #333;
+        }
+        .news-item {
+            background-color: #fff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .news-item h2 {
+            margin-top: 0;
+            font-size: 1.2em;
+        }
+        .news-item p {
+            color: #555;
+        }
+        .news-item a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .news-item a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Últimas Notícias de Futebol</h1>
+    <div id="news-container"></div>
+
+    <script>
+        const url = 'https://footballnewsapi.netlify.app/.netlify/functions/api/news/espn';
+
+        async function fetchNews() {
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                displayNews(data);
+            } catch (error) {
+                console.error('Erro ao buscar notícias:', error);
+            }
+        }
+
+        function displayNews(news) {
+            const container = document.getElementById('news-container');
+            container.innerHTML = ''; // Limpa o conteúdo anterior
+
+            news.forEach(item => {
+                const newsItem = document.createElement('div');
+                newsItem.classList.add('news-item');
+
+                const title = document.createElement('h2');
+                title.textContent = item.title;
+                newsItem.appendChild(title);
+
+                const description = document.createElement('p');
+                description.textContent = item.description;
+                newsItem.appendChild(description);
+
+                const link = document.createElement('a');
+                link.href = item.url;
+                link.target = '_blank';
+                link.textContent = 'Leia mais';
+                newsItem.appendChild(link);
+
+                container.appendChild(newsItem);
+            });
+        }
+
+        // Atualiza as notícias a cada 5 minutos
+        setInterval(fetchNews, 5 * 60 * 1000);
+
+        // Carrega as notícias ao carregar a página
+        fetchNews();
+    </script>
+</body>
+</html>
+
+
