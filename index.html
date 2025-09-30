@@ -1,55 +1,22 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>API Futebol Brasileiro</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: #003366;
-      color: white;
-      text-align: center;
-      padding: 1rem;
-    }
-    .container {
-      padding: 2rem;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 2rem;
-    }
-    th, td {
-      padding: 0.8rem;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-    }
-    th {
-      background-color: #003366;
-      color: white;
-    }
-    img {
-      width: 24px;
-      height: 24px;
-      vertical-align: middle;
-      margin-right: 8px;
-    }
+    body { background: #1e1e2f; color: #fff; font-family: Arial, sans-serif; }
+    header { background: #123456; padding: 20px; text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #fff; padding: 8px; text-align: center; }
+    th { background-color: #123456; }
   </style>
 </head>
 <body>
+  <header>
+    <h1>API Futebol Brasileiro</h1>
+    <p>Dados atualizados sobre o Campeonato Brasileiro</p>
+  </header>
 
-<header>
-  <h1>API Futebol Brasileiro</h1>
-  <p>Dados atualizados sobre o Campeonato Brasileiro</p>
-</header>
-
-<div class="container">
   <h2>Tabela do Campeonato Brasileiro</h2>
   <table id="tabela">
     <thead>
@@ -68,48 +35,50 @@
       </tr>
     </thead>
     <tbody>
-      <!-- Dados da tabela serão inseridos aqui -->
+      <!-- Dados vão aparecer aqui -->
     </tbody>
   </table>
-</div>
 
-<script>
-  // Função para formatar o aproveitamento
-  function formatarAproveitamento(pontos, jogos) {
-    return ((pontos / (jogos * 3)) * 100).toFixed(1);
-  }
+  <script>
+    const urlAPI = "AQUI_VAI_SUA_API"; // Coloque o link da API
 
-  // Função para carregar a tabela do Campeonato Brasileiro
-  async function carregarTabela() {
-    try {
-      const response = await fetch('https://api-futebol-brasileiro.herokuapp.com/campeonato/brasileiro/tabela');
-      const dados = await response.json();
+    async function atualizarTabela() {
+      try {
+        const resposta = await fetch(urlAPI);
+        const dados = await resposta.json();
 
-      const tabela = document.getElementById('tabela').getElementsByTagName('tbody')[0];
-      dados.forEach(time => {
-        const row = tabela.insertRow();
-        row.innerHTML = `
-          <td>${time.posicao}</td>
-          <td><img src="${time.icone_url}" alt="${time.nome_time}"> ${time.nome_time}</td>
-          <td>${time.pontos}</td>
-          <td>${time.jogos}</td>
-          <td>${time.vitorias}</td>
-          <td>${time.empates}</td>
-          <td>${time.derrotas}</td>
-          <td>${time.gols_pro}</td>
-          <td>${time.gols_contra}</td>
-          <td>${time.saldo_de_gols}</td>
-          <td>${formatarAproveitamento(time.pontos, time.jogos)}%</td>
-        `;
-      });
-    } catch (error) {
-      console.error('Erro ao carregar a tabela:', error);
+        const tbody = document.querySelector("#tabela tbody");
+        tbody.innerHTML = ""; // Limpa tabela antes de atualizar
+
+        dados.forEach((time, index) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${time.nome}</td>
+            <td>${time.pontos}</td>
+            <td>${time.jogos}</td>
+            <td>${time.vitorias}</td>
+            <td>${time.empates}</td>
+            <td>${time.derrotas}</td>
+            <td>${time.golsPro}</td>
+            <td>${time.golsContra}</td>
+            <td>${time.saldoGols}</td>
+            <td>${time.aproveitamento}%</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error("Erro ao atualizar tabela:", err);
+      }
     }
-  }
 
-  // Carregar a tabela ao iniciar a página
-  window.onload = carregarTabela;
-</script>
+    // Atualiza a cada 60 segundos
+    atualizarTabela();
+    setInterval(atualizarTabela, 60000);
+  </script>
+</body>
+</html>
 
 </body>
 </html>
+
