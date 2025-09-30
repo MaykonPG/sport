@@ -1,40 +1,76 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Widget Futebol</title>
-<style>
-  body { font-family: Arial, sans-serif; background: #f0f0f0; }
-  .match { background: #fff; padding: 10px; margin: 10px; border-radius: 8px; box-shadow: 0 0 5px #aaa; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Próximos Jogos - Campeonato Brasileiro</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #004d00;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+    }
+    .match {
+      background-color: white;
+      margin: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .match h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .match p {
+      margin: 5px 0;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
-<h2>Próximos jogos da Premier League</h2>
-<div id="matches">Carregando...</div>
+
+<header>
+  <h1>Próximos Jogos - Campeonato Brasileiro</h1>
+</header>
+
+<div id="matches"></div>
 
 <script>
-const options = {
-  method: 'GET',
-  headers: {
-    'X-RapidAPI-Key': '2f6d232e2cmshf4c8dd23535935fp1bdc69jsn8e17204ce890',
-    'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com'
-  }
-};
+  const apiKey = 'live_861d0b68d92e7c9f36e08214fc3c92'; // Substitua por sua chave da API Futebol
+  const url = `https://api-futebol.com.br/v1/campeonatos/10/jogos/`;
 
-fetch('https://api-football-v1.p.rapidapi.com/v3/fixtures?league=39&season=2025&next=5', options)
+  fetch(url, {
+    headers: {
+      'Authorization': `Bearer ${apiKey}`
+    }
+  })
   .then(response => response.json())
   .then(data => {
-    const matchesDiv = document.getElementById('matches');
-    matchesDiv.innerHTML = '';
-    data.response.forEach(game => {
-      const home = game.teams.home.name;
-      const away = game.teams.away.name;
-      const date = new Date(game.fixture.date).toLocaleString();
-      matchesDiv.innerHTML += `<div class="match"><strong>${home}</strong> x <strong>${away}</strong><br>${date}</div>`;
+    const matchesContainer = document.getElementById('matches');
+    data.jogos.forEach(jogo => {
+      const matchElement = document.createElement('div');
+      matchElement.classList.add('match');
+      matchElement.innerHTML = `
+        <h3>${jogo.time_casa.nome} vs ${jogo.time_visitante.nome}</h3>
+        <p><strong>Data:</strong> ${new Date(jogo.data_hora).toLocaleString()}</p>
+        <p><strong>Estádio:</strong> ${jogo.estadio.nome}</p>
+        <p><strong>Local:</strong> ${jogo.estadio.cidade} - ${jogo.estadio.estado}</p>
+      `;
+      matchesContainer.appendChild(matchElement);
     });
   })
-  .catch(err => document.getElementById('matches').innerText = 'Erro ao carregar jogos');
+  .catch(error => {
+    console.error('Erro ao carregar os jogos:', error);
+  });
 </script>
-</body>
 
+</body>
 </html>
+
