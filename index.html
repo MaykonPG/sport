@@ -40,11 +40,15 @@
   </table>
 
   <script>
-    const urlAPI = "AQUI_VAI_SUA_API"; // Coloque o link da API
+    const urlAPI = "https://api.api-futebol.com.br/v1/campeonatos/10/tabela"; // URL da API
 
     async function atualizarTabela() {
       try {
-        const resposta = await fetch(urlAPI);
+        const resposta = await fetch(urlAPI, {
+          headers: {
+            "Authorization": "live_861d0b68d92e7c9f36e08214fc3c92" // Substitua por sua chave de API
+          }
+        });
         const dados = await resposta.json();
 
         const tbody = document.querySelector("#tabela tbody");
@@ -54,7 +58,7 @@
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${index + 1}</td>
-            <td>${time.nome}</td>
+            <td>${time.time.nome}</td>
             <td>${time.pontos}</td>
             <td>${time.jogos}</td>
             <td>${time.vitorias}</td>
@@ -72,13 +76,10 @@
       }
     }
 
-    // Atualiza a cada 60 segundos
+    // Atualiza a tabela ao carregar a página
     atualizarTabela();
+    // Atualiza a cada 60 segundos
     setInterval(atualizarTabela, 60000);
   </script>
 </body>
 </html>
-
-</body>
-</html>
-
