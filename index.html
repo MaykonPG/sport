@@ -2,84 +2,44 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>API Futebol Brasileiro</title>
+  <title>Notícias de Futebol</title>
   <style>
-    body { background: #1e1e2f; color: #fff; font-family: Arial, sans-serif; }
-    header { background: #123456; padding: 20px; text-align: center; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #fff; padding: 8px; text-align: center; }
-    th { background-color: #123456; }
+    body { background: #1e1e2f; color: #fff; font-family: Arial, sans-serif; padding: 20px; }
+    h1 { text-align: center; }
+    ul { list-style: none; padding: 0; }
+    li { margin-bottom: 10px; }
+    a { color: #00ff00; text-decoration: none; }
+    a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>API Futebol Brasileiro</h1>
-    <p>Dados atualizados sobre o Campeonato Brasileiro</p>
-  </header>
-
-  <h2>Tabela do Campeonato Brasileiro</h2>
-  <table id="tabela">
-    <thead>
-      <tr>
-        <th>Posição</th>
-        <th>Time</th>
-        <th>Pontos</th>
-        <th>Jogos</th>
-        <th>Vitórias</th>
-        <th>Empates</th>
-        <th>Derrotas</th>
-        <th>Gols Pró</th>
-        <th>Gols Contra</th>
-        <th>Saldo de Gols</th>
-        <th>Aproveitamento</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Dados vão aparecer aqui -->
-    </tbody>
-  </table>
+  <h1>Notícias de Futebol</h1>
+  <ul id="noticias"></ul>
 
   <script>
-    const urlAPI = "https://api.api-futebol.com.br/v1/campeonatos/10/tabela"; // URL da API
+    const urlRSS = "https://globoesporte.globo.com/rss/futebol/"; // Feed público
 
-    async function atualizarTabela() {
+    async function carregarNoticias() {
       try {
-        const resposta = await fetch(urlAPI, {
-          headers: {
-            "Authorization": "live_861d0b68d92e7c9f36e08214fc3c92" // Substitua por sua chave de API
-          }
-        });
+        const resposta = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(urlRSS)}`);
         const dados = await resposta.json();
 
-        const tbody = document.querySelector("#tabela tbody");
-        tbody.innerHTML = ""; // Limpa tabela antes de atualizar
+        const ul = document.getElementById("noticias");
+        ul.innerHTML = "";
 
-        dados.forEach((time, index) => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${time.time.nome}</td>
-            <td>${time.pontos}</td>
-            <td>${time.jogos}</td>
-            <td>${time.vitorias}</td>
-            <td>${time.empates}</td>
-            <td>${time.derrotas}</td>
-            <td>${time.golsPro}</td>
-            <td>${time.golsContra}</td>
-            <td>${time.saldoGols}</td>
-            <td>${time.aproveitamento}%</td>
-          `;
-          tbody.appendChild(tr);
+        dados.items.slice(0, 10).forEach(item => { // mostra só 10 notícias
+          const li = document.createElement("li");
+          li.innerHTML = `<a href="${item.link}" target="_blank">${item.title}</a>`;
+          ul.appendChild(li);
         });
       } catch (err) {
-        console.error("Erro ao atualizar tabela:", err);
+        console.error("Erro ao carregar notícias:", err);
       }
     }
 
-    // Atualiza a tabela ao carregar a página
-    atualizarTabela();
-    // Atualiza a cada 60 segundos
-    setInterval(atualizarTabela, 60000);
+    carregarNoticias();
+    setInterval(carregarNoticias, 60000); // atualiza a cada 1 min
   </script>
 </body>
 </html>
+
